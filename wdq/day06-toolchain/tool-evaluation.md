@@ -19,7 +19,7 @@ TYPE_MAPPING = {
 "TIMESTAMP": "TIMESTAMP",
 "CLOB": "STRING"
 }
-![](test1.png)
+
 
 目的：Oracle 数据类型 → Snowflake 对应类型
 
