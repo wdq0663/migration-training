@@ -10,7 +10,7 @@ Oracle → Snowflake Migration Tool 原理解析
 
 SQL 方言转换
 
-1️⃣ 数据类型映射 (TYPE_MAPPING)
+数据类型映射 (TYPE_MAPPING)
 TYPE_MAPPING = {
 "NUMBER": "NUMBER",
 "VARCHAR2": "VARCHAR",
@@ -19,7 +19,7 @@ TYPE_MAPPING = {
 "TIMESTAMP": "TIMESTAMP",
 "CLOB": "STRING"
 }
-
+![](test1.png)
 
 目的：Oracle 数据类型 → Snowflake 对应类型
 
@@ -33,7 +33,7 @@ TYPE_MAPPING = {
 
 举例：VARCHAR2(20) → VARCHAR(20)
 
-2️⃣ 表名提取 (extract_table_name)
+表名提取 (extract_table_name)
 def extract_table_name(ddl: str) -> str:
 match = re.search(
 r"CREATE\s+(?:OR\s+REPLACE\s+)?TABLE\s+((?:\"[^\"]+\"|\w+)(?:\.(?:\"[^\"]+\"|\w+))?)",
@@ -60,7 +60,7 @@ re.IGNORECASE
 
 去掉双引号，保证 Snowflake 语法正确
 
-3️⃣ 列解析与 DDL 生成 (convert_column + convert_ddl)
+列解析与 DDL 生成 (convert_column + convert_ddl)
 (a) 单列转换 convert_column
 def convert_column(line: str) -> str:
 line = line.strip().rstrip(",")
@@ -122,10 +122,10 @@ order_id NUMBER(18,0) NOT NULL,
 -- MANUAL STEP REQUIRED: indexes, constraints, partitions
 
 
-✅ 原理：先抓列块，再逐行解析，避免了之前“in_cols + 行首匹配”的脆弱逻辑
-✅ 稳定应对企业真实 DDL（跨行、缩进、注释、OR REPLACE、schema、双引号）
+原理：先抓列块，再逐行解析，避免了之前“in_cols + 行首匹配”的脆弱逻辑
+稳定应对企业真实 DDL（跨行、缩进、注释、OR REPLACE、schema、双引号）
 
-4️⃣ SQL 方言转换 (translate_sql)
+SQL 方言转换 (translate_sql)
 def translate_sql(sql_text: str) -> str:
 sql_text = re.sub(r'\bSYSDATE\b', 'CURRENT_DATE', sql_text, flags=re.IGNORECASE)
 sql_text = re.sub(r'\bSYSTIMESTAMP\b', 'CURRENT_TIMESTAMP', sql_text, flags=re.IGNORECASE)
@@ -152,7 +152,7 @@ INSERT INTO orders(order_id, order_date) VALUES(1, SYSDATE);
 
 INSERT INTO orders(order_id, order_date) VALUES(1, CURRENT_DATE);
 
-5️⃣ 脚本整体流程
+脚本整体流程
 
 读取 Oracle DDL 文件
 
@@ -160,11 +160,49 @@ INSERT INTO orders(order_id, order_date) VALUES(1, CURRENT_DATE);
 
 调用 translate_sql() → 简单 SQL 方言转换
 
-输出结果到控制台
+输出结果到控制台,结果如图所示
+![](test1.png)
+Oracle DDL 特点
+使用 CREATE OR REPLACE TABLE
+多个高精度 NUMBER(p,s) 数值列
+行内定义 PRIMARY KEY
+独立 ALTER TABLE ... CLUSTER BY 语句
+包含注释、缩进，接近真实生产 DDL
+该示例主要验证了脚本在复杂 DDL 场景下的稳定性：
+正确识别 OR REPLACE 表名
+精确映射高精度 NUMBER 类型
+自动完成 CURRENT_TIMESTAMP 转换
+安全忽略 Oracle 物理特性（CLUSTER BY）
+这体现了工具的设计取向：只自动迁移 Snowflake 语义明确的对象。
 
-提示手工迁移索引、约束、分区
+![](test2.png)
+Oracle DDL 特点
+使用 DEFAULT SYSDATE、DEFAULT SYSTIMESTAMP
+包含独立的 CREATE INDEX 语句
+表结构相对简单，但包含典型 Oracle 方言
+说明
+该示例重点展示：
+SYSDATE → CURRENT_DATE
+SYSTIMESTAMP → CURRENT_TIMESTAMP
+SQL 方言通过正则规则安全转换
+同时可以看到：
+Oracle 索引未被自动迁移
+避免将 OLTP 思维下的索引直接带入 Snowflake
 
-6️⃣ 为什么这个脚本稳定
+![](test3.png)
+Oracle DDL 特点
+表结构与主键定义分离
+使用 ALTER TABLE ADD CONSTRAINT PRIMARY KEY
+常见于规范化建模或老系统
+说明
+该示例体现了工具的重要原则：
+表结构优先迁移
+约束不盲目自动化
+明确提示人工决策
+
+
+
+为什么这个脚本稳定
 问题	解决方案
 表名带 OR REPLACE、schema、双引号	extract_table_name 正则处理
 列块跨行、缩进、注释	convert_ddl 正则抓列块 + strip +过滤
