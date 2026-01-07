@@ -283,10 +283,3 @@ Oracle DDL 特点
 明确提示人工决策
 
 
-
-为什么这个脚本稳定
-问题	解决方案
-表名带 OR REPLACE、schema、双引号	extract_table_name 正则处理
-列块跨行、缩进、注释	convert_ddl 正则抓列块 + strip +过滤
-Oracle 类型差异	TYPE_MAPPING + DEFAULT 函数转换
-SQL 方言差异	translate_sql 正则批量替换
