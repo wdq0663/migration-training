@@ -1,4 +1,4 @@
-Slow Query 1（6 表 JOIN）
+# Slow Query 1（6 表 JOIN）
 ❌ 原始问题（结合数据）
 orders (50k)
  × payments (50k)
@@ -76,7 +76,7 @@ users / departments 最后	极小表，广播 JOIN，几乎 0 成本
 
 
 
-Slow Query 2（部门年度聚合）
+# Slow Query 2（部门年度聚合）
 ❌ 原 SQL 的真实问题（结合数据）
 GROUP BY d.department_name
 
@@ -135,7 +135,7 @@ HAVING 过滤（可能剩 1~2 行）
 
 
 
-Slow Query 3：相关子查询（最致命）
+# Slow Query 3：相关子查询（最致命）
 原 SQL（Snowflake 非常不友好）
 WHERE o.order_amount > (
     SELECT AVG(o2.order_amount)
@@ -187,7 +187,7 @@ Snowflake 执行器对 window 非常强
 
 
 
-
+# SQL4
 一、为什么这条 SQL 在 Snowflake 里慢（核心原因）
 表现状（非常关键）
 orders_perf
@@ -275,7 +275,7 @@ execution_time	明显缩短
 pruning	有效 micro-partition pruning
 
 
-
+# SQL5
 代码存在的主要问题是：
 
 for (int i = 1; i <= 100; i++) {
@@ -350,7 +350,7 @@ conn.setAutoCommit(false);
 
 
 
-
+# SQL6
 
 // ❌ 故意设置过小
 config.setMaximumPoolSize(5);
