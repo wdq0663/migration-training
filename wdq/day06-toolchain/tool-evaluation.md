@@ -1,4 +1,4 @@
-Oracle → Snowflake Migration Tool 原理解析
+### Oracle → Snowflake Migration Tool 原理解析
 
 该脚本用于将 Oracle DDL / SQL 自动转换为 Snowflake 可执行语法，整体设计遵循 “结构优先、语义安全、避免过度自动化” 的原则。
 
@@ -12,7 +12,7 @@ Oracle → Snowflake Migration Tool 原理解析
     
     SQL 方言转换
 
-一、数据类型映射（TYPE_MAPPING）
+## 一、数据类型映射（TYPE_MAPPING）
     TYPE_MAPPING = {
     "NUMBER": "NUMBER",
     "VARCHAR2": "VARCHAR",
@@ -22,11 +22,11 @@ Oracle → Snowflake Migration Tool 原理解析
     "CLOB": "STRING"
     }
 
-1. 目的
+# 1. 目的
 
     将 Oracle 数据类型 映射为 Snowflake 对应类型，保证表结构语义一致。
 
-2. 实现原理
+# 2. 实现原理
 
     在解析列定义时：
     
@@ -48,11 +48,11 @@ Oracle → Snowflake Migration Tool 原理解析
     
     CLOB
 
-3. 示例
+# 3. 示例
    VARCHAR2(20)  →  VARCHAR(20)
    NUMBER(18,0)  →  NUMBER(18,0)
 
-二、表名提取（extract_table_name）
+## 二、表名提取（extract_table_name）
     def extract_table_name(ddl: str) -> str:
     match = re.search(
     r"CREATE\s+(?:OR\s+REPLACE\s+)?TABLE\s+((?:\"[^\"]+\"|\w+)(?:\.(?:\"[^\"]+\"|\w+))?)",
@@ -60,11 +60,11 @@ Oracle → Snowflake Migration Tool 原理解析
     re.IGNORECASE
     )
 
-1. 目的
+# 1. 目的
 
     从 Oracle DDL 中稳定提取真实表名，适配生产环境的各种写法。
 
-2. 支持特性
+# 2. 支持特性
 
     CREATE TABLE
     
@@ -78,7 +78,7 @@ Oracle → Snowflake Migration Tool 原理解析
     
     如："ORDERS"
 
-3. 实现逻辑
+# 3. 实现逻辑
 
     使用正则精确匹配 CREATE TABLE 后的表名部分
     
@@ -86,7 +86,7 @@ Oracle → Snowflake Migration Tool 原理解析
     
     移除双引号，保证 Snowflake 语法兼容
 
-三、列解析与 DDL 生成
+## 三、列解析与 DDL 生成
     （一）单列转换：convert_column
     def convert_column(line: str) -> str:
     line = line.strip().rstrip(",")
@@ -117,7 +117,7 @@ Oracle → Snowflake Migration Tool 原理解析
     输出示例
     order_date DATE DEFAULT CURRENT_DATE
 
-（二）DDL 生成：convert_ddl
+    （二）DDL 生成：convert_ddl
     block_match = re.search(
     r"CREATE\s+(?:OR\s+REPLACE\s+)?TABLE\s+[^\(]+\((.*)\)\s*;",
     oracle_ddl,
@@ -162,16 +162,16 @@ re.DOTALL：支持多行匹配
     
     更贴近真实企业级 DDL
 
-四、SQL 方言转换               
+## 四、SQL 方言转换               
     def translate_sql(sql_text: str) -> str:
     sql_text = re.sub(r'\bSYSDATE\b', 'CURRENT_DATE', sql_text, flags=re.IGNORECASE)
     sql_text = re.sub(r'\bSYSTIMESTAMP\b', 'CURRENT_TIMESTAMP', sql_text, flags=re.IGNORECASE)
 
-1. 作用
+# 1. 作用
     
     将 Oracle SQL 方言 转换为 Snowflake 可执行语法。
 
-2. 实现方式
+# 2. 实现方式
 
     使用正则进行 批量安全替换
     
@@ -181,7 +181,7 @@ re.DOTALL：支持多行匹配
     
     TO_CHAR(date) → TO_VARCHAR(date)
 
-3. 示例
+# 3. 示例
 
 原始 Oracle SQL：
 
@@ -194,7 +194,7 @@ re.DOTALL：支持多行匹配
         INSERT INTO orders(order_id, order_date)
         VALUES (1, CURRENT_DATE);
 
-五、脚本整体执行流程
+## 五、脚本整体执行流程
 
     读取 Oracle DDL 文件
 
@@ -207,6 +207,10 @@ re.DOTALL：支持多行匹配
     完成 SQL 方言转换
 
     输出结果到控制台
+
+
+## 六、典型 DDL 场景验证说明
+# 1.
 ![](test1.png)
 Oracle DDL 特点
 
@@ -232,6 +236,7 @@ Oracle DDL 特点
 
 这体现了工具的设计取向：只自动迁移 Snowflake 语义明确的对象。
 
+# 2.
 ![](test2.png)
 Oracle DDL 特点
 
@@ -257,6 +262,7 @@ Oracle 索引未被自动迁移
 
 避免将 OLTP 思维下的索引直接带入 Snowflake
 
+# 3.
 ![](test3.png)
 Oracle DDL 特点
 
