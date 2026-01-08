@@ -1,3 +1,4 @@
+![](bugfix.png)
 🐛 Bug 1：连接池配置错误 → Snowflake 连接超时
 ❌ Before（Oracle 思维直接照搬）
 HikariConfig config = new HikariConfig();
