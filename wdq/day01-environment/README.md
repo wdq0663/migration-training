@@ -26,6 +26,7 @@
 - [ ] Oracle SQL Developer 23.1
 - [ ] SnowSQL CLI 1.2.28
 
+![](environment-test-result.png)
 
 ### 3. Git 工作流
 
