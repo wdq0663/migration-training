@@ -1,8 +1,8 @@
-Day 8 JDBC Bug Bash 总结
+# Day 8 JDBC Bug Bash 总结
 
 Oracle → Snowflake 迁移常见 JDBC 问题与修复方案
 
-一、背景说明
+## 一、背景说明
 
 在 Oracle → Snowflake 迁移过程中，
 JDBC 层问题往往比 SQL 问题更隐蔽，也更容易引发生产事故。
@@ -10,15 +10,22 @@ JDBC 层问题往往比 SQL 问题更隐蔽，也更容易引发生产事故。
 本次 Bug Bash 聚焦于 5 类高频、真实发生过的 JDBC 迁移问题，
 通过定位根因、修复代码并验证行为，形成如下总结。
 
-二、5 个 Bug 总览表（速览）
-Bug 编号	问题类型	风险级别	典型后果
+## 二、5 个 Bug 总览表（速览）
+
+Bug  编号	问题类型	风险级别	典型后果   
+
 Bug 1	连接池配置不当	高	连接超时、系统不可用
+
 Bug 2	JDBC 资源未关闭	极高	连接泄漏、仓库持续计费
+
 Bug 3	Oracle 参数残留	中	启动失败、隐性配置污染
+
 Bug 4	错误事务隔离级别	中	性能下降、连接占用
+
 Bug 5	混用 Oracle / Snowflake 数据源	极高	串库、随机故障
-三、逐个 Bug 汇总说明
-🐛 Bug 1：连接池配置错误（Snowflake 连接超时）
+
+## 三、逐个 Bug 汇总说明
+### 🐛 Bug 1：连接池配置错误（Snowflake 连接超时）
 
 问题表现
 
@@ -44,7 +51,7 @@ Snowflake 不适合高连接并发
 
 Snowflake = 少连接 + 高吞吐
 
-🐛 Bug 2：未关闭 ResultSet / Statement（连接泄漏）
+### 🐛 Bug 2：未关闭 ResultSet / Statement（连接泄漏）
 
 问题表现
 
@@ -70,7 +77,7 @@ Snowflake session 被长期占用
 
 JDBC 资源必须成组关闭，不能“只关连接”。
 
-🐛 Bug 3：Oracle 专属连接参数残留
+### 🐛 Bug 3：Oracle 专属连接参数残留
 
 问题表现
 
@@ -94,7 +101,7 @@ JDBC 启动异常
 
 迁移不是“加配置”，而是“减配置”。
 
-🐛 Bug 4：错误的事务隔离级别设置
+### 🐛 Bug 4：错误的事务隔离级别设置
 
 问题表现
 
@@ -118,7 +125,7 @@ JDBC 启动异常
 
 Snowflake 的读查询不需要显式事务控制。
 
-🐛 Bug 5：混用 Oracle 与 Snowflake 数据源
+### 🐛 Bug 5：混用 Oracle 与 Snowflake 数据源
 
 问题表现
 
@@ -142,7 +149,7 @@ Spring 容器中 DataSource 不隔离
 
 迁移阶段禁止在同一运行时混用多数据源。
 
-四、5 个 Bug 的共性教训（非常重要）
+## 四、5 个 Bug 的共性教训（非常重要）
 🔑 共性 1：Oracle 经验 ≠ Snowflake 最佳实践
 
 Snowflake 是云数仓，不是传统 OLTP 数据库。
@@ -155,7 +162,7 @@ Snowflake 是云数仓，不是传统 OLTP 数据库。
 
 残留配置比写错代码更难排查。
 
-五、迁移 JDBC 的 5 条黄金法则（汇总版）
+## 五、迁移 JDBC 的 5 条黄金法则（汇总版）
 
 始终使用 try-with-resources
 
