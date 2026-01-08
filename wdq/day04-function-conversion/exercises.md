@@ -4,9 +4,10 @@
    SELECT employee_id,
           DECODE(department_id, 10, 'Admin', 20, 'Sales', 'Other') AS dept_name
    FROM employees;
-
+    ```
    -- 改写为 Snowflake (请在此处填写)
    ```
+````
    SELECT employee_id,
        CASE
          WHEN department_id = 10 THEN 'Admin'
@@ -14,7 +15,7 @@
          ELSE 'Other'
        END AS dept_name
     FROM employees;
-
+   ````
 
    **练习 2**: 转换 ROWNUM
    ```sql

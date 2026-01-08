@@ -87,13 +87,15 @@
     移除双引号，保证 Snowflake 语法兼容
 
 ## 三、列解析与 DDL 生成
-    （一）单列转换：convert_column
+（一）单列转换：
+````
+    convert_column
     def convert_column(line: str) -> str:
     line = line.strip().rstrip(",")
     parts = line.split()
     col_name = parts[0]
     oracle_type = parts[1]
-    
+````
     处理步骤
     
     去除首尾空格与尾部逗号
@@ -115,9 +117,12 @@
     SYSTIMESTAMP → CURRENT_TIMESTAMP
     
     输出示例
+
     order_date DATE DEFAULT CURRENT_DATE
 
-    （二）DDL 生成：convert_ddl
+（二）DDL 生成：
+
+    convert_ddl
     block_match = re.search(
     r"CREATE\s+(?:OR\s+REPLACE\s+)?TABLE\s+[^\(]+\((.*)\)\s*;",
     oracle_ddl,
@@ -147,6 +152,7 @@ re.DOTALL：支持多行匹配
 生成 Snowflake DDL
 
 输出示例
+
     CREATE OR REPLACE TABLE orders (
     order_id NUMBER(18,0) NOT NULL,
     ...

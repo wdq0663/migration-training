@@ -6,6 +6,7 @@ SQL 直接报错
 逻辑结果错误但不易察觉
 ## 复现步骤
 -- Oracle
+````
 SELECT SYSDATE FROM DUAL;
 
 SELECT * FROM orders WHERE ROWNUM <= 10;
@@ -14,7 +15,7 @@ SELECT employee_id, manager_id, LEVEL
 FROM employees
 START WITH manager_id IS NULL
 CONNECT BY PRIOR employee_id = manager_id;
-
+````
 
 在 Snowflake 中执行以上 SQL：
 
@@ -26,14 +27,17 @@ CONNECT BY：❌ 不支持
 
 ## 解决方案
 -- Snowflake 当前时间
+````
 SELECT CURRENT_TIMESTAMP();
-
+````
 -- Top N 查询
+````
 SELECT *
 FROM orders
 QUALIFY ROW_NUMBER() OVER (ORDER BY order_id) <= 10;
-
+````
 -- 递归层级查询
+````
 WITH RECURSIVE org_cte AS (
     SELECT employee_id, manager_id, 1 AS level
     FROM employees
@@ -45,7 +49,7 @@ WITH RECURSIVE org_cte AS (
       ON e.manager_id = o.employee_id
 )
 SELECT * FROM org_cte;
-
+````
 ## 预防措施
 
 建立“Oracle 特有语法清单”（DUAL / ROWNUM / CONNECT BY / DECODE）
@@ -65,17 +69,19 @@ Oracle → Snowflake 的数据类型映射如果“凭感觉”，非常容易�
 ## 复现步骤
 
 -- Oracle
+````
 SALARY NUMBER(10,2)
 ORDER_DATE DATE
 DESCRIPTION CLOB
-
+````
 
 错误迁移示例：
 -- Snowflake（错误）
+````
 SALARY FLOAT;
 ORDER_DATE DATE;
 DESCRIPTION VARCHAR(255);
-
+````
 
 问题：
 FLOAT → 金额精度不可控
@@ -84,11 +90,11 @@ VARCHAR(255) → CLOB 数据被截断
 
 ## 解决方案
 -- Snowflake（正确）
-
+````
 SALARY NUMBER(10,2);
 ORDER_DATE TIMESTAMP_NTZ;
 DESCRIPTION VARCHAR; -- 或 VARIANT
-
+````
 ## 预防措施
 禁止使用 FLOAT 存储金额
 日期字段统一确认：
@@ -111,14 +117,17 @@ MIN/MAX(日期字段)
 这是最隐蔽、最容易漏测的一类问题。
 ## 复现步骤
 -- Oracle
+````
 SELECT NVL(NULL, 'A') FROM DUAL;
 SELECT 'A' || NULL FROM DUAL;  -- 返回 'A'
-
+````
 -- Snowflake
+````
 SELECT NVL(NULL, 'A');         -- OK
 SELECT 'A' || NULL;            -- 返回 NULL ❌
-
+````
 ## 解决方案
+````
 -- 推荐写法
 SELECT COALESCE(col, 'A');
 
@@ -137,7 +146,7 @@ CASE
   WHEN status = 'I' THEN 'INACTIVE'
   ELSE 'UNKNOWN'
 END
-
+````
 ## 预防措施
 禁止“逐字翻译”函数
 所有函数迁移必须回答一个问题：

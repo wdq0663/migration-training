@@ -25,7 +25,8 @@ payments 先按 status 裁剪（SUCCESS ≈ 90%）
 
 小维表全部放最后
 
-✅ 最优 SQL（强烈推荐直接用）
+✅ 最优 SQL
+````
 WITH filtered_orders AS (
     SELECT
         order_id,
@@ -61,23 +62,25 @@ JOIN users u
     ON o.user_id = u.user_id
 JOIN departments d
     ON u.department_id = d.department_id;
-
+````
 优化后
 ![](b1.png)
 
 📈 为什么这是这套数据下的最优解
+````
 优化点	说明
 orders 先过滤	直接触发 micro-partition pruning
 payments 状态提前	避免 FAILED 订单参与 JOIN
 order_items 放中间	防止过早放大结果集
 users / departments 最后	极小表，广播 JOIN，几乎 0 成本
 无相关子查询	完全并行
-
+````
 
 
 
 # Slow Query 2（部门年度聚合）
 ❌ 原 SQL 的真实问题（结合数据）
+
 GROUP BY d.department_name
 
 
@@ -98,6 +101,7 @@ Snowflake 聚合黄金法则
 先在事实表 + 轻维表聚合，再 JOIN 维表
 
 ✅ 最优 SQL（事实表先聚合）
+````
 WITH dept_agg AS (
     SELECT
         u.department_id,
@@ -117,7 +121,7 @@ SELECT
 FROM dept_agg a
 JOIN departments d
     ON a.department_id = d.department_id;
-
+````
 优化后
 ![](b2.png)
 
@@ -137,11 +141,13 @@ HAVING 过滤（可能剩 1~2 行）
 
 # Slow Query 3：相关子查询（最致命）
 原 SQL（Snowflake 非常不友好）
+````
 WHERE o.order_amount > (
     SELECT AVG(o2.order_amount)
     FROM orders o2
     WHERE o2.user_id = o.user_id
 )
+````
 修改前
 ![](a3.png)
 ❌ 问题点：
@@ -159,6 +165,7 @@ Snowflake 最佳实践
 ✅ 或者直接用 窗口函数（最推荐）
 
 ✅ 窗口函数（Snowflake 最优）
+````
 SELECT DISTINCT
     u.user_id,
     u.user_name,
@@ -173,6 +180,7 @@ JOIN (
 ) o
     ON u.user_id = o.user_id
 WHERE o.order_amount > o.avg_amount;
+````
 修改后
 ![](b3.png)
 为什么这是 Snowflake 最优
@@ -224,20 +232,24 @@ Warehouse 扩大 ≠ 根本解决
 ✅ Clustering Key = order_date
 
 三、优化步骤（标准、可复现）
+
 ✅ Step 1：创建 Clustering Key（不是索引）
+````
 ALTER TABLE orders_perf
 CLUSTER BY (order_date);
-
+````
 
 
 ✅ Step 2：触发 Re-cluster（关键一步）
+````
 CREATE OR REPLACE TABLE orders_perf_clustered
 CLUSTER BY (order_date)
 AS
 SELECT *
 FROM orders_perf;
-
+````
 ✅ Step 3：重新执行查询（SQL 本身无需改）
+````
 SELECT
     COUNT(*) AS order_count,
     SUM(order_amount) AS total_amount
@@ -245,7 +257,7 @@ FROM orders_perf
 WHERE order_date >= DATE '2024-01-01'
   AND order_date <  DATE '2024-02-01';
 
-
+````
 用 >= / <
 
 避免 BETWEEN 的边界歧义
@@ -257,27 +269,28 @@ WHERE order_date >= DATE '2024-01-01'
 
 ![](a4-1.png)
 ![](a4-2.png)
-
+````
 指标	现象
 partitions_scanned	≈ partitions_total
 bytes_scanned	接近整表
 execution_time	随 warehouse 放大
 pruning	几乎没有
+````
 ✅ 优化后（重点）
 
 ![](b4-1.png)
 ![](b4-2.png)
-
+````
 指标	变化
 partitions_scanned	大幅下降（<5%）
 bytes_scanned	下降 10x~100x
 execution_time	明显缩短
 pruning	有效 micro-partition pruning
-
+````
 
 # SQL5
 代码存在的主要问题是：
-
+````
 for (int i = 1; i <= 100; i++) {
 ps.setInt(1, i);
 ps.setString(2, "USER_" + i);
@@ -285,12 +298,13 @@ ps.setString(2, "USER_" + i);
     // ❌ 逐行执行
     ps.executeUpdate();
 }
-
+````
 ![](a5.png)
 ❌ 问题：每插入一条数据就执行一次 SQL，这样会频繁和数据库通信，效率很低。
 ✅ 优化方法：使用 批量插入（batch），一次性把多条记录发送给数据库，提高性能。
 
 优化后的代码示例
+````
 HikariDataSource ds = new HikariDataSource(config);
 
 try (Connection conn = ds.getConnection()) {
@@ -329,6 +343,7 @@ conn.setAutoCommit(false);
     long end = System.currentTimeMillis();
     System.out.println("总耗时(ms): " + (end - start));
 }
+````
 ![](b5.png)
 🔑 优化点
 
@@ -351,14 +366,15 @@ conn.setAutoCommit(false);
 
 
 # SQL6
-
+````
 // ❌ 故意设置过小
 config.setMaximumPoolSize(5);
 config.setConnectionTimeout(300);
-
+````
 ![](a6.png)
 
 改为
+````
 config.setConnectionTimeout(3000);
-
+````
 ![](b6.png)

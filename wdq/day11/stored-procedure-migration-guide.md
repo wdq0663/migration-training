@@ -88,6 +88,7 @@ DELETE / TRUNCATE 等高风险操作
 改造成本相对较高
 
 示例
+````
 try {
     conn.setAutoCommit(false);
     stmt.executeUpdate(sql);
@@ -96,8 +97,8 @@ try {
     conn.rollback();
     throw e;
 }
-
-4.2 策略 2：Snowflake JavaScript 存储过程
+````
+### 4.2 策略 2：Snowflake JavaScript 存储过程
 适用场景
 
 Oracle CURSOR
@@ -121,11 +122,12 @@ JavaScript 调试成本较高
 不适合极大数据量循环
 
 示例
+````
 while (rs.next()) {
     var cnt = rs.getColumnValue(1);
 }
-
-4.3 策略 3：Snowflake Scripting（SQL）
+````
+### 4.3 策略 3：Snowflake Scripting（SQL）
 适用场景
 
 参数传递
@@ -146,21 +148,26 @@ while (rs.next()) {
 
 ### 5. 常见语法与概念转换规则
 #### 5.1 变量与控制流
+````
 Oracle PL/SQL	Snowflake
 ELSIF	ELSEIF
 SYSDATE	CURRENT_TIMESTAMP()
 SELECT INTO	LET / JS ResultSet
 OUT 参数	RETURNS
+````
 #### 5.2 游标与循环
+````
 Oracle	Snowflake
 CURSOR	ResultSet
 FOR rec IN cursor	while (rs.next())
 %ROWTYPE	JS 对象
+````
 #### 5.3 动态 SQL
+````
 Oracle	Snowflake
 EXECUTE IMMEDIATE	JS stmt.execute()
 SQLERRM	Exception message
-
+````
 ⚠️ 注意：
 Snowflake 不支持对对象名使用 bind 变量，涉及对象名的动态 SQL 强烈建议迁移至应用层。
 
@@ -174,10 +181,13 @@ Snowflake 存储过程 默认自动提交
 复杂事务应放在应用层
 
 #### 6.2 异常处理
+````
 Oracle	Snowflake
 EXCEPTION WHEN OTHERS	try / catch
 SQLERRM	error.message
+````
 ### 7. 决策树（迁移策略选择）
+````
 开始
  │
  ├─ 是否包含动态 SQL（表名/列名）？
@@ -191,7 +201,7 @@ SQLERRM	error.message
  ├─ 是否仅为简单 CRUD？
  │        ├─ 是 → Snowflake Scripting（策略 3）
  │        └─ 否 → JavaScript 存储过程（策略 2）
-
+````
 ### 8. 功能验证建议
 
 对比 Oracle 与 Snowflake 结果集

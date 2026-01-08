@@ -39,11 +39,13 @@ DELETE 高风险操作
 该存储过程属于高风险运维型逻辑，不适合继续保留在数据库层，必须迁移至应用层。
 
 ### 4. 关键迁移点
+````
    Oracle PL/SQL	Java 应用
    EXECUTE IMMEDIATE	Statement
    COMMIT / ROLLBACK	JDBC 事务
    EXCEPTION	try / catch
    SQLERRM	Exception.getMessage()
+   ````
 ### 5. 安全设计
 
 表名白名单控制

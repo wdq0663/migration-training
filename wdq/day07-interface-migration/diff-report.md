@@ -17,6 +17,7 @@ SQL 类型	单表 SELECT
 复杂度	低
 
 2️⃣ 修改前（Oracle）
+````
 private static final String ORACLE_URL =
 "jdbc:oracle:thin:@//localhost:1521/ORCL";
 
@@ -27,8 +28,9 @@ String sql =
 "AND created_date <= SYSDATE";
 
 user.setCreatedDate(rs.getDate("created_date"));
-
+````
 3️⃣ 修改后（Snowflake）
+````
 private static final String SNOWFLAKE_URL =
 "jdbc:snowflake://abc123.snowflakecomputing.com/?db=APP_DB&schema=PUBLIC";
 
@@ -41,11 +43,15 @@ String sql =
 user.setCreatedDate(
 rs.getTimestamp("created_date").toLocalDateTime()
 );
-
+````
 4️⃣ 差异点对比说明
-修改点	Oracle	Snowflake	说明
+
+修改点   	Oracle   	Snowflake	 说明
+
 JDBC URL	oracle:thin	snowflake	替换数据源
+
 日期函数	SYSDATE	CURRENT_DATE	SQL 方言差异
+
 时间类型读取	getDate	getTimestamp	保留时间精度
 
 5️⃣ 风险与验证
@@ -59,13 +65,19 @@ JDBC URL	oracle:thin	snowflake	替换数据源
 # 三、接口二：订单统计报表接口（JOIN + GROUP BY）
 
 1️⃣ 接口说明
+
 项目	内容
+
 接口名称	getOrderSummaryReport
+
 功能	按客户统计订单数量与金额
+
 SQL 类型	JOIN + 聚合
+
 复杂度	中
 
 2️⃣ 修改前（Oracle）
+````
 String sql =
 "SELECT c.customer_name, " +
 "COUNT(o.id) AS order_cnt, " +
@@ -75,8 +87,9 @@ String sql =
 "AND o.created_date >= SYSDATE - 30 " +
 "GROUP BY c.customer_name " +
 "HAVING SUM(o.amount) > 1000";
-
+````
 3️⃣ 修改后（Snowflake）
+````
 String sql =
 "SELECT c.customer_name, " +
 "COUNT(o.id) AS order_cnt, " +
@@ -86,21 +99,26 @@ String sql =
 "WHERE o.created_date >= DATEADD(day, -30, CURRENT_DATE) " +
 "GROUP BY c.customer_name " +
 "HAVING SUM(o.amount) > 1000";
-
+````
 4️⃣ 差异点对比说明
+
 修改点	Oracle	Snowflake	说明
+
 JOIN 方式	隐式 JOIN	显式 JOIN	可读性与规范
+
 日期计算	SYSDATE - 30	DATEADD	Snowflake 标准函数
+
 SQL 规范	老式写法	ANSI JOIN	推荐实践
 
 5️⃣ 聚合结果处理差异
+````
 // Oracle
 BigDecimal total = rs.getBigDecimal("total_amount");
 
 // Snowflake
 BigDecimal total = rs.getBigDecimal("total_amount");
 
-
+````
 聚合字段在 Snowflake 中返回 NUMBER，BigDecimal 兼容，无需调整。
 
 6️⃣ 风险与验证
