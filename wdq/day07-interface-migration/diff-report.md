@@ -17,6 +17,7 @@ SQL 类型	单表 SELECT
 复杂度	低
 
 2️⃣ 修改前（Oracle）
+![](o1.png)
 ````
 private static final String ORACLE_URL =
 "jdbc:oracle:thin:@//localhost:1521/ORCL";
@@ -30,6 +31,7 @@ String sql =
 user.setCreatedDate(rs.getDate("created_date"));
 ````
 3️⃣ 修改后（Snowflake）
+![](s1.png)
 ````
 private static final String SNOWFLAKE_URL =
 "jdbc:snowflake://abc123.snowflakecomputing.com/?db=APP_DB&schema=PUBLIC";
@@ -77,6 +79,7 @@ SQL 类型	JOIN + 聚合
 复杂度	中
 
 2️⃣ 修改前（Oracle）
+![](o2.png)
 ````
 String sql =
 "SELECT c.customer_name, " +
@@ -89,6 +92,7 @@ String sql =
 "HAVING SUM(o.amount) > 1000";
 ````
 3️⃣ 修改后（Snowflake）
+![](s2.png)
 ````
 String sql =
 "SELECT c.customer_name, " +

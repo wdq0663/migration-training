@@ -1,6 +1,7 @@
-![](bugfix.png)
+
 🐛 Bug 1：连接池配置错误 → Snowflake 连接超时
 ❌ Before（Oracle 思维直接照搬）
+![](b1.png)
 ````
 HikariConfig config = new HikariConfig();
 config.setJdbcUrl(snowflakeUrl);
@@ -42,7 +43,9 @@ DataSource ds = new HikariDataSource(config);
 💡 原则：Snowflake 是“少连接 + 大吞吐”
 
 🐛 Bug 2：未关闭 ResultSet / Statement → 连接泄漏
+
 ❌ Before（最经典泄漏）
+![](b2.png)
 ````
 Connection conn = ds.getConnection();
 PreparedStatement ps = conn.prepareStatement(sql);
@@ -111,6 +114,7 @@ Connection conn =
 
 🐛 Bug 4：错误的事务隔离级别
 ❌ Before（Oracle 默认习惯）
+![](b4.png)
 ````
 Connection conn = ds.getConnection();
 conn.setAutoCommit(false);
@@ -140,6 +144,7 @@ conn.setAutoCommit(true); // ✅ 大多数查询无需事务
 
 🐛 Bug 5：混用 Oracle & Snowflake 连接池
 ❌ Before（真实事故级别）
+![](b5.png)
 ````
 @Bean
 public DataSource dataSource() {
@@ -172,3 +177,6 @@ public DataSource snowflakeDataSource() {
 或直接 彻底删除 Oracle 相关 Bean
 
 💡 迁移阶段：只允许“一个真数据源”
+
+修改后
+![](bugfix.png)
