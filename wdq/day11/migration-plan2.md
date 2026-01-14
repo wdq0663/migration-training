@@ -35,16 +35,20 @@
 该存储过程包含游标与循环逻辑，使用 JavaScript 存储过程更易实现与维护。
 
 ### 4. 关键迁移点
+````
    Oracle PL/SQL	Snowflake JavaScript
    CURSOR	ResultSet
    FOR LOOP	while (rs.next())
    SELECT INTO	rs.getXXX()
    SYSDATE	CURRENT_TIMESTAMP()
+   ````
 ### 5. 风险与应对
+````
    风险	应对措施
    性能问题	控制 ResultSet 大小
    多次 INSERT	批量插入（可选优化）
    权限问题	使用最小权限角色
+   ````
 ### 6. 验证方式
 
 对比部门数量是否一致

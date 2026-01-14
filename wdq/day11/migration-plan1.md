@@ -27,26 +27,31 @@
 选择策略：策略 3 —— Snowflake Scripting（SQL 存储过程）
 
 ### 3. 选择原因
+````
    评估维度	说明
    逻辑复杂度	⭐ 非常简单
    SQL 依赖	纯 SQL
    事务控制	Snowflake 可自动管理
    可维护性	高
    是否需要应用层	否
-
+````
 结论：
 该存储过程逻辑简单，适合直接保留在数据库层，使用 Snowflake Scripting 可最大程度保持原有结构与可读性。
 
 ### 4. 关键迁移点
+````
    Oracle PL/SQL	Snowflake Scripting
    SYSDATE	CURRENT_TIMESTAMP()
    COMMIT	可移除（自动提交）
    VARCHAR2	VARCHAR
    NUMBER	NUMBER(p,s)
+   ````
 ### 5. 风险与应对
+````
    风险	应对措施
    时间函数差异	统一使用 UTC
    自动提交差异	明确不在 SP 中控制事务
+   ````
 ### 6. 验证方式
 
 插入数据后校验行数
