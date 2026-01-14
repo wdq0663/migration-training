@@ -143,3 +143,16 @@ void testSumPrecision() {
     assertEquals(new BigDecimal("60.66"), total);
     assertEquals(2, total.scale(), "小数位数应该是2位");
 }
+```
+
+## 4. 测试结果
+![](test.png)
+
+## 5. 测试结论
+本次单元测试验证了 Employer DAO 模块在以下方面的正确性：
+
+SQL 正常执行与异常处理
+Oracle 专用函数行为（DECODE / NVL）
+多表聚合与排序逻辑
+边界数据与空结果处理
+为后续数据库迁移和回归测试提供了可靠保障。
