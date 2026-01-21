@@ -1,0 +1,113 @@
+/* =========================
+   共通设置
+========================= */
+
+/* 全站基础字体与行高（提高可读性） */
+body {
+  line-height: 1.8;
+  color: #333;
+}
+
+/* =========================
+   ① 联系我们（CTA）按钮样式
+========================= */
+
+/* 通用按钮样式（Contact / CTA） */
+a.wp-block-button__link,
+.button,
+.btn,
+input[type="submit"] {
+  background-color: #0a4fa3; /* 企业蓝 */
+  color: #ffffff;
+  padding: 14px 32px;
+  border-radius: 6px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: all 0.3s ease;
+  border: none;
+}
+
+/* Hover 效果 */
+a.wp-block-button__link:hover,
+.button:hover,
+.btn:hover,
+input[type="submit"]:hover {
+  background-color: #083b7a;
+  opacity: 0.9;
+  transform: translateY(-2px);
+}
+
+/* =========================
+   ② TOP 页面 Hero 区域高度调整
+========================= */
+
+/* Gutenberg Cover 区块（Hero 区） */
+.wp-block-cover {
+  min-height: 70vh; /* Hero 高度 */
+  display: flex;
+  align-items: center;
+}
+
+/* Hero 内文字居中 */
+.wp-block-cover__inner-container {
+  text-align: center;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+/* Hero 主标题 */
+.wp-block-cover h1 {
+  font-size: 2.5rem;
+  margin-bottom: 20px;
+}
+
+/* =========================
+   ③ Company 页面表格样式
+========================= */
+
+/* 公司信息表格 */
+.wp-block-table table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 40px 0;
+}
+
+/* 表格单元格 */
+.wp-block-table th,
+.wp-block-table td {
+  border: 1px solid #ddd;
+  padding: 16px;
+}
+
+/* 表头 */
+.wp-block-table th {
+  background-color: #f5f7fa;
+  font-weight: 600;
+  width: 30%;
+}
+
+/* =========================
+   ④ 移动端微调（加分项）
+========================= */
+
+@media (max-width: 768px) {
+
+  /* Hero 标题缩小 */
+  .wp-block-cover h1 {
+    font-size: 1.8rem;
+  }
+
+  /* 按钮在手机上全宽 */
+  a.wp-block-button__link {
+    display: block;
+    width: 100%;
+    text-align: center;
+  }
+
+  /* 表格文字防止挤压 */
+  .wp-block-table th,
+  .wp-block-table td {
+    padding: 12px;
+    font-size: 14px;
+  }
+}
