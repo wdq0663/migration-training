@@ -1,0 +1,4 @@
+code,name,category,price,stock,inventory_value
+PROD-A001,製品A,電子機器,1500,100,150000
+PROD-B002,製品B,機械部品,3200,50,160000
+PROD-C003,製品C,消耗品,2800,200,560000

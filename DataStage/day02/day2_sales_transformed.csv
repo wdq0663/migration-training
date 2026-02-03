@@ -1,0 +1,6 @@
+order_id,customer_name,product_code,quantity,unit_price,order_date,total_amount
+ORD001,ヤマダショウジ,PROD-A001,10,1500,2024年01月15日,15000
+ORD002,タナカコウギョウ,PROD-B002,5,3200,2024年01月16日,16000
+ORD003,スズキデンキ,PROD-A001,20,1500,2024年01月17日,30000
+ORD004,サトウブッサン,PROD-C003,8,2800,2024年01月18日,22400
+ORD005,タカハシケンセツ,PROD-B002,15,3200,2024年01月19日,48000
